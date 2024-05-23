@@ -1,0 +1,44 @@
+spring:
+  #config server configuration
+  cloud:
+    config:
+      enabled: true
+      uri: http://localhost:8888
+ #gateway configuration
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: auth-service
+          uri: lb://authentication-service
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AuthenticationFilter
+        - id: user-management-service
+          uri: lb://user-management-service
+          predicates:
+            - Path=/users/**
+          filters:
+            - AuthenticationFilter
+        - id: task-management-service
+          uri: lb://task-management-service
+          predicates:
+              - Path=/tasks/**
+          filters:
+            - AuthenticationFilter
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+server:
+  port: ${SERVER_PORT}
+
+logging:
+  level:
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+    root: INFO
